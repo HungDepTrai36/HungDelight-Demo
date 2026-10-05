@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Hưng Delight - Ocean Paradise</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Be Vietnam Pro -->
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        ocean: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        sun: {
+                            300: '#fde047',
+                            400: '#facc15',
+                            500: '#eab308',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Be Vietnam Pro', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Styling & Glassmorphism */
+        body {
+            font-family: 'Be Vietnam Pro', sans-serif;
+            overflow-x: hidden;
+            background: #0284c7;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px 0 rgba(0, 150, 200, 0.15), inset 0 0 12px rgba(255, 255, 255, 0.5);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 20px rgba(13, 148, 136, 0.08);
+        }
+
+        .glass-user-msg {
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.85), rgba(20, 184, 166, 0.9));
+            color: white;
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.25);
+        }
+
+        .glass-ai-msg {
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 20px rgba(0, 120, 180, 0.08);
+        }
+
+        /* Avatar Pulsing Glow */
+        .avatar-glow {
+            box-shadow: 0 0 25px rgba(45, 212, 191, 0.8), 0 0 50px rgba(250, 204, 21, 0.5);
+            animation: pulseGlow 3s infinite alternate ease-in-out;
+        }
+
+        .avatar-thinking {
+            animation: bounceScale 0.8s infinite alternate ease-in-out, pulseGlow 1s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 15px rgba(45, 212, 191, 0.6), 0 0 30px rgba(250, 204, 21, 0.3); }
+            100% { box-shadow: 0 0 30px rgba(45, 212, 191, 1), 0 0 60px rgba(250, 204, 21, 0.8); }
+        }
+
+        @keyframes bounceScale {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.08) translateY(-4px); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(20, 184, 166, 0.5);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(20, 184, 166, 0.8);
+        }
+
+        /* Shimmering Gold Text */
+        .gold-text {
+            background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #b45309 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .ocean-text {
+            background: linear-gradient(135deg, #0284c7 0%, #0d9488 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between text-slate-800 antialiased selection:bg-teal-200">
+
+    <!-- Interactive Ocean Sunray & Fish Canvas -->
+    <canvas id="oceanCanvas" class="fixed inset-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <!-- Main Application UI Header -->
+    <header class="relative z-10 w-full px-4 py-3 sm:px-8 max-w-6xl mx-auto mt-2">
+        <div class="glass-panel rounded-2xl px-5 py-3 flex items-center justify-between shadow-lg border border-white/60">
+            <!-- Logo & Avatar Status -->
+            <div class="flex items-center space-x-3 sm:space-x-4">
+                <div class="relative">
+                    <div id="aiAvatar" class="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-gradient-to-tr from-teal-400 via-cyan-300 to-amber-300 p-1 avatar-glow transition-all duration-300 flex items-center justify-center cursor-pointer">
+                        <div class="w-full h-full rounded-full bg-cyan-900/10 flex items-center justify-center overflow-hidden backdrop-blur-xs">
+                            <span class="text-2xl sm:text-3xl">🐬</span>
+                        </div>
+                    </div>
+                    <span id="aiStatusDot" class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-400 border-2 border-white rounded-full"></span>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h1 class="text-xl sm:text-2xl font-extrabold ocean-text tracking-tight">Hưng Delight</h1>
+                        <span class="bg-amber-100 text-amber-700 text-xs font-semibold px-2 py-0.5 rounded-full border border-amber-300 shadow-xs">AI Ocean 3.0</span>
+                    </div>
+                    <p id="aiStatusText" class="text-xs text-teal-800 font-medium">Sẵn sàng lắng nghe & chia sẻ cùng bạn ✨</p>
+                </div>
+            </div>
+
+            <!-- Audio Controls Panel -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <!-- Ambient Music Toggle -->
+                <button id="bgMusicBtn" onclick="toggleBgMusic()" class="px-3 py-2 rounded-xl bg-white/70 hover:bg-white text-teal-700 text-xs sm:text-sm font-semibold flex items-center space-x-2 shadow-xs transition-all border border-teal-100" title="Bật/Tắt Nhạc Nền Biển">
+                    <i id="bgMusicIcon" class="fas fa-music text-teal-500"></i>
+                    <span id="bgMusicText" class="hidden sm:inline">Nhạc Nền</span>
+                </button>
+
+                <!-- Sound Effects Toggle -->
+                <button id="sfxBtn" onclick="toggleSfx()" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-white/70 hover:bg-white text-amber-600 text-xs sm:text-sm font-semibold flex items-center space-x-1.5 shadow-xs transition-all border border-amber-100" title="Bật/Tắt Hiệu Ứng Âm Thanh">
+                    <i id="sfxIcon" class="fas fa-volume-up text-amber-500"></i>
+                    <span id="sfxText" class="hidden sm:inline">Âm Thanh</span>
+                </button>
+
+                <!-- TTS Voice Speed Toggle -->
+                <button id="ttsBtn" onclick="toggleSpeechAutoPlay()" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-white/70 hover:bg-white text-cyan-700 text-xs sm:text-sm font-semibold flex items-center space-x-1.5 shadow-xs transition-all border border-cyan-100" title="Tự Động Đọc Giọng Nói">
+                    <i id="ttsIcon" class="fas fa-comment-dots text-cyan-600"></i>
+                    <span id="ttsText" class="hidden sm:inline">Đọc Thoại</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Chat Workspace -->
+    <main class="relative z-10 flex-1 max-w-5xl w-full mx-auto px-4 py-4 flex flex-col justify-between overflow-hidden">
+        
+        <!-- Quick Prompts Toolbar -->
+        <div class="flex items-center space-x-2 overflow-x-auto pb-2 mb-2 no-scrollbar scroll-smooth">
+            <button onclick="sendQuickPrompt('Chào Hưng Delight! Hãy giới thiệu về bản thân bạn bằng giọng văn dễ thương nhé!')" class="whitespace-nowrap px-3 py-1.5 rounded-full bg-white/80 hover:bg-white text-teal-800 text-xs font-medium shadow-xs border border-teal-200 transition-all flex items-center space-x-1">
+                <span>👋 Giới thiệu bản thân</span>
+            </button>
+            <button onclick="sendQuickPrompt('Hãy kể cho tôi nghe một câu chuyện thư giãn về biển cả đại dương.')" class="whitespace-nowrap px-3 py-1.5 rounded-full bg-white/80 hover:bg-white text-cyan-800 text-xs font-medium shadow-xs border border-cyan-200 transition-all flex items-center space-x-1">
+                <span>🌊 Truyện thư giãn biển</span>
+            </button>
+            <button onclick="sendQuickPrompt('Cho tôi 3 lời khuyên để giải tỏa căng thẳng sau giờ làm việc.')" class="whitespace-nowrap px-3 py-1.5 rounded-full bg-white/80 hover:bg-white text-amber-800 text-xs font-medium shadow-xs border border-amber-200 transition-all flex items-center space-x-1">
+                <span>✨ Giải tỏa căng thẳng</span>
+            </button>
+            <button onclick="sendQuickPrompt('Sáng tạo cho tôi một bài thơ ngắn tràn đầy năng lượng bình minh!')" class="whitespace-nowrap px-3 py-1.5 rounded-full bg-white/80 hover:bg-white text-emerald-800 text-xs font-medium shadow-xs border border-emerald-200 transition-all flex items-center space-x-1">
+                <span>🌅 Bài thơ nắng sớm</span>
+            </button>
+        </div>
+
+        <!-- Chat History Window -->
+        <div id="chatBox" class="glass-panel flex-1 rounded-3xl p-4 sm:p-6 overflow-y-auto space-y-4 mb-4 min-h-[380px] max-h-[60vh] border border-white/80 shadow-2xl">
+            <!-- Welcome Message from AI -->
+            <div class="flex items-start space-x-3">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-teal-400 to-amber-300 p-0.5 shadow-md flex-shrink-0">
+                    <div class="w-full h-full rounded-full bg-white flex items-center justify-center text-sm">🐬</div>
+                </div>
+                <div class="glass-ai-msg rounded-2xl rounded-tl-none p-4 max-w-[85%] sm:max-w-[75%] text-slate-800 shadow-sm leading-relaxed">
+                    <div class="font-bold text-teal-700 text-sm mb-1 flex items-center justify-between">
+                        <span>Hưng Delight</span>
+                        <span class="text-[10px] text-slate-400 font-normal">Vừa xong</span>
+                    </div>
+                    <p class="text-sm sm:text-base">Xin chào bạn yêu quý! ☀️ Tôi là **Hưng Delight** - người bạn đồng hành tràn đầy năng lượng tươi mát từ biển cả ngọc bích. Bạn cần tôi trợ giúp gì hay muốn trò chuyện thư giãn hôm nay?</p>
+                    <div class="mt-3 flex items-center space-x-2 pt-2 border-t border-slate-100/60">
+                        <button onclick="speakMessage(this)" class="text-teal-600 hover:text-teal-800 text-xs flex items-center space-x-1 px-2 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 transition">
+                            <i class="fas fa-volume-up"></i>
+                            <span>Đọc</span>
+                        </button>
+                        <button onclick="copyMessage(this)" class="text-slate-500 hover:text-slate-700 text-xs flex items-center space-x-1 px-2 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 transition">
+                            <i class="fas fa-copy"></i>
+                            <span>Sao chép</span>
+                        </button>
+                        <button onclick="addReaction(this, '❤️')" class="text-slate-400 hover:text-red-500 text-xs px-2 py-1 rounded-lg bg-slate-50 hover:bg-red-50 transition">
+                            ❤️
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Input Area -->
+        <div class="glass-panel rounded-2xl p-2 sm:p-3 border border-white/80 shadow-lg relative">
+            <form id="chatForm" onsubmit="handleUserSubmit(event)" class="flex items-center space-x-2">
+                <input type="text" id="userInput" placeholder="Nhập tin nhắn nhắn gửi Hưng Delight..." class="flex-1 bg-white/70 focus:bg-white text-slate-800 placeholder-slate-400 text-sm sm:text-base rounded-xl px-4 py-3 outline-none transition-all border border-teal-100 focus:border-teal-400 focus:ring-2 focus:ring-teal-200">
+                
+                <button type="button" onclick="startVoiceRecognition()" id="micBtn" class="p-3 rounded-xl bg-white/80 hover:bg-white text-teal-600 hover:text-teal-800 transition shadow-xs border border-teal-100" title="Nhập bằng giọng nói">
+                    <i class="fas fa-microphone text-base"></i>
+                </button>
+
+                <button type="submit" id="sendBtn" class="px-5 py-3 rounded-xl bg-gradient-to-r from-teal-500 via-cyan-500 to-amber-400 hover:opacity-95 text-white font-semibold text-sm sm:text-base shadow-md hover:shadow-lg transition-all flex items-center space-x-2">
+                    <span>Gửi</span>
+                    <i class="fas fa-paper-plane text-xs"></i>
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer Information -->
+    <footer class="relative z-10 text-center py-2 text-xs text-white/80 font-medium drop-shadow-xs">
+        <p>AI Hưng Delight © 2026 - Rạn San Hô & Biển Ngọc Nắng Sáng 🌊☀️</p>
+    </footer>
+
+    <!-- Audio & Logic Scripts -->
+    <script>
+        // Web Audio API Synthesis Engine for Ocean Music and Sound FX
+        let audioCtx = null;
+        let bgMusicGain = null;
+        let isBgMusicPlaying = false;
+        let isSfxEnabled = true;
+        let autoSpeechEnabled = true;
+        let oceanOscillators = [];
+
+        function initAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Ambient Ocean Waves Synthesizer using White Noise & Lowpass Filters
+        function startOceanAmbientMusic() {
+            initAudioContext();
+            if (isBgMusicPlaying) return;
+
+            // Master Gain for Background Music
+            bgMusicGain = audioCtx.createGain();
+            bgMusicGain.gain.setValueAtTime(0.08, audioCtx.currentTime); // Gentle volume
+            bgMusicGain.connect(audioCtx.destination);
+
+            // 1. Create Buffer for Ocean Wave Noise
+            const bufferSize = 2 * audioCtx.sampleRate;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+
+            const whiteNoise = audioCtx.createBufferSource();
+            whiteNoise.buffer = noiseBuffer;
+            whiteNoise.loop = true;
+
+            // Filter to make noise sound like ocean waves
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(300, audioCtx.currentTime);
+
+            // LFO for wave swelling effect
+            const lfo = audioCtx.createOscillator();
+            lfo.frequency.setValueAtTime(0.12, audioCtx.currentTime); // Slow wave swell
+            const lfoGain = audioCtx.createGain();
+            lfoGain.gain.setValueAtTime(200, audioCtx.currentTime);
+
+            lfo.connect(lfoGain);
+            lfoGain.connect(filter.frequency);
+
+            whiteNoise.connect(filter);
+            filter.connect(bgMusicGain);
+
+            whiteNoise.start();
+            lfo.start();
+
+            // 2. Add Ambient Calm Chimes (Synth Melodic Notes)
+            const chords = [261.63, 329.63, 392.00, 523.25, 587.33]; // C E G C E
+            const interval = setInterval(() => {
+                if (!isBgMusicPlaying) {
+                    clearInterval(interval);
+                    return;
+                }
+                playAmbientChime(chords[Math.floor(Math.random() * chords.length)]);
+            }, 3500);
+
+            oceanOscillators = [whiteNoise, lfo];
+            isBgMusicPlaying = true;
+            updateMusicUI();
+        }
+
+        function playAmbientChime(freq) {
+            if (!bgMusicGain || !isBgMusicPlaying) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0.01, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.04, audioCtx.currentTime + 1);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 4);
+
+            osc.connect(gain);
+            gain.connect(bgMusicGain);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 4.1);
+        }
+
+        function stopOceanAmbientMusic() {
+            if (bgMusicGain) {
+                bgMusicGain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1);
+                setTimeout(() => {
+                    oceanOscillators.forEach(osc => { try { osc.stop(); } catch(e){} });
+                    oceanOscillators = [];
+                }, 1000);
+            }
+            isBgMusicPlaying = false;
+            updateMusicUI();
+        }
+
+        function toggleBgMusic() {
+            if (isBgMusicPlaying) {
+                stopOceanAmbientMusic();
+            } else {
+                startOceanAmbientMusic();
+                playSfx('chime');
+            }
+        }
+
+        function updateMusicUI() {
+            const icon = document.getElementById('bgMusicIcon');
+            const btn = document.getElementById('bgMusicBtn');
+            if (isBgMusicPlaying) {
+                icon.className = 'fas fa-volume-up text-amber-500 animate-pulse';
+                btn.classList.add('bg-amber-50', 'border-amber-300');
+            } else {
+                icon.className = 'fas fa-music text-teal-500';
+                btn.classList.remove('bg-amber-50', 'border-amber-300');
+            }
+        }
+
+        // Sound FX Generator (Bubble Pop, WHOOSH, Chime, Bell)
+        function playSfx(type) {
+            if (!isSfxEnabled) return;
+            initAudioContext();
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'bubble') {
+                // Bubble Pop Sound
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.09);
+
+            } else if (type === 'whoosh') {
+                // Wave Whoosh Sound
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, now);
+                osc.frequency.linearRampToValueAtTime(400, now + 0.15);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.3);
+
+                gain.gain.setValueAtTime(0.01, now);
+                gain.gain.linearRampToValueAtTime(0.15, now + 0.15);
+                gain.gain.linearRampToValueAtTime(0.001, now + 0.3);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.31);
+
+            } else if (type === 'chime') {
+                // Happy Chime Sound for Receive Msg
+                [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now + i * 0.06);
+
+                    gain.gain.setValueAtTime(0.15, now + i * 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.06 + 0.3);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + i * 0.06);
+                    osc.stop(now + i * 0.06 + 0.31);
+                });
+            }
+        }
+
+        function toggleSfx() {
+            isSfxEnabled = !isSfxEnabled;
+            const icon = document.getElementById('sfxIcon');
+            if (isSfxEnabled) {
+                icon.className = 'fas fa-volume-up text-amber-500';
+                playSfx('bubble');
+            } else {
+                icon.className = 'fas fa-volume-mute text-slate-400';
+            }
+        }
+
+        function toggleSpeechAutoPlay() {
+            autoSpeechEnabled = !autoSpeechEnabled;
+            const icon = document.getElementById('ttsIcon');
+            if (autoSpeechEnabled) {
+                icon.className = 'fas fa-comment-dots text-cyan-600';
+                playSfx('bubble');
+            } else {
+                icon.className = 'fas fa-comment-slash text-slate-400';
+            }
+        }
+
+        // Canvas 2D: Sunrays, Sparkling Bubbles & Bioluminescent Fish
+        const canvas = document.getElementById('oceanCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        let bubbles = [];
+        let fishes = [];
+
+        function resizeCanvas() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            initElements();
+        }
+
+        function initElements() {
+            bubbles = [];
+            fishes = [];
+
+            // Create Bubbles
+            for (let i = 0; i < 45; i++) {
+                bubbles.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height,
+                    r: Math.random() * 5 + 2,
+                    speed: Math.random() * 1.2 + 0.4,
+                    opacity: Math.random() * 0.5 + 0.3,
+                    wobble: Math.random() * Math.PI * 2
+                });
+            }
+
+            // Create Bioluminescent Fish
+            for (let i = 0; i < 8; i++) {
+                fishes.push({
+                    x: Math.random() * width,
+                    y: Math.random() * height * 0.7 + height * 0.1,
+                    speed: (Math.random() * 1.2 + 0.6) * (Math.random() > 0.5 ? 1 : -1),
+                    size: Math.random() * 12 + 10,
+                    color: i % 2 === 0 ? '#5eead4' : '#facc15'
+                });
+            }
+        }
+
+        function drawOceanBackground() {
+            // Bright Ocean Gradient (Turquoise to Deep Aqua)
+            const bgGrad = ctx.createLinearGradient(0, 0, 0, height);
+            bgGrad.addColorStop(0, '#38bdf8');   // Bright Sky Cyan
+            bgGrad.addColorStop(0.3, '#2dd4bf'); // Turquoise
+            bgGrad.addColorStop(0.7, '#0d9488'); // Deep Sea Emerald
+            bgGrad.addColorStop(1, '#0f766e');   // Ocean Blue
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Sun Rays Effect
+            ctx.save();
+            ctx.globalCompositeOperation = 'overlay';
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(width * 0.2 * i, 0);
+                ctx.lineTo(width * 0.2 * i + 150, height);
+                ctx.lineTo(width * 0.2 * i + 50, height);
+                ctx.lineTo(width * 0.2 * i - 80, 0);
+                const rayGrad = ctx.createLinearGradient(0, 0, 0, height);
+                rayGrad.addColorStop(0, 'rgba(254, 240, 138, 0.45)');
+                rayGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = rayGrad;
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        function animateCanvas() {
+            drawOceanBackground();
+
+            // Animate & Draw Bubbles
+            bubbles.forEach(b => {
+                b.y -= b.speed;
+                b.wobble += 0.03;
+                b.x += Math.sin(b.wobble) * 0.5;
+
+                if (b.y < -10) {
+                    b.y = height + 10;
+                    b.x = Math.random() * width;
+                }
+
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${b.opacity})`;
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                ctx.lineWidth = 0.8;
+                ctx.stroke();
+            });
+
+            // Animate & Draw Glowing Fish
+            fishes.forEach(f => {
+                f.x += f.speed;
+                if (f.x > width + 30) f.x = -30;
+                if (f.x < -30) f.x = width + 30;
+
+                ctx.save();
+                ctx.translate(f.x, f.y);
+                if (f.speed < 0) ctx.scale(-1, 1);
+
+                // Glow Effect
+                ctx.shadowColor = f.color;
+                ctx.shadowBlur = 12;
+
+                // Simple Fish Body
+                ctx.beginPath();
+                ctx.ellipse(0, 0, f.size, f.size / 2, 0, 0, Math.PI * 2);
+                ctx.fillStyle = f.color;
+                ctx.fill();
+
+                // Tail
+                ctx.beginPath();
+                ctx.moveTo(-f.size, 0);
+                ctx.lineTo(-f.size - 8, -6);
+                ctx.lineTo(-f.size - 8, 6);
+                ctx.closePath();
+                ctx.fillStyle = f.color;
+                ctx.fill();
+
+                ctx.restore();
+            });
+
+            requestAnimationFrame(animateCanvas);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+        animateCanvas();
+
+        // AI Logic & Speech Integration
+        const API_KEY = ""; // Automated by platform runtime
+        const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${API_KEY}`;
+
+        let chatHistory = [];
+
+        async function handleUserSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            input.value = '';
+            playSfx('whoosh');
+
+            // Append User Message
+            appendUserMessage(message);
+
+            // Set Avatar Thinking State
+            setAIThinking(true);
+
+            // Generate AI Response
+            try {
+                const responseText = await fetchGeminiResponse(message);
+                setAIThinking(false);
+                appendAIMessage(responseText);
+                playSfx('chime');
+
+                if (autoSpeechEnabled) {
+                    speakText(responseText);
+                }
+            } catch (err) {
+                console.error(err);
+                setAIThinking(false);
+                const fallbackMsg = "Ôi, sóng biển vừa chập chờn chút xíu! Nhưng Hưng Delight vẫn ở đây nè. Bạn nhắn lại cho mình nhé! 🌊✨";
+                appendAIMessage(fallbackMsg);
+            }
+        }
+
+        function sendQuickPrompt(text) {
+            document.getElementById('userInput').value = text;
+            document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+        }
+
+        function appendUserMessage(text) {
+            const chatBox = document.getElementById('chatBox');
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const html = `
+                <div class="flex items-start justify-end space-x-3">
+                    <div class="glass-user-msg rounded-2xl rounded-tr-none p-4 max-w-[85%] sm:max-w-[75%] leading-relaxed">
+                        <div class="font-bold text-cyan-100 text-sm mb-1 flex items-center justify-between space-x-2">
+                            <span>Bạn</span>
+                            <span class="text-[10px] text-cyan-200 font-normal">${timeStr}</span>
+                        </div>
+                        <p class="text-sm sm:text-base">${escapeHtml(text)}</p>
+                    </div>
+                </div>
+            `;
+            chatBox.insertAdjacentHTML('beforeend', html);
+            scrollToBottom();
+        }
+
+        function appendAIMessage(text) {
+            const chatBox = document.getElementById('chatBox');
+            const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const formattedText = formatMarkdown(text);
+
+            const html = `
+                <div class="flex items-start space-x-3">
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-teal-400 to-amber-300 p-0.5 shadow-md flex-shrink-0">
+                        <div class="w-full h-full rounded-full bg-white flex items-center justify-center text-sm">🐬</div>
+                    </div>
+                    <div class="glass-ai-msg rounded-2xl rounded-tl-none p-4 max-w-[85%] sm:max-w-[75%] text-slate-800 shadow-sm leading-relaxed">
+                        <div class="font-bold text-teal-700 text-sm mb-1 flex items-center justify-between">
+                            <span>Hưng Delight</span>
+                            <span class="text-[10px] text-slate-400 font-normal">${timeStr}</span>
+                        </div>
+                        <div class="text-sm sm:text-base msg-body">${formattedText}</div>
+                        <div class="mt-3 flex items-center space-x-2 pt-2 border-t border-slate-100/60">
+                            <button onclick="speakMessage(this)" class="text-teal-600 hover:text-teal-800 text-xs flex items-center space-x-1 px-2 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 transition">
+                                <i class="fas fa-volume-up"></i>
+                                <span>Đọc</span>
+                            </button>
+                            <button onclick="copyMessage(this)" class="text-slate-500 hover:text-slate-700 text-xs flex items-center space-x-1 px-2 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 transition">
+                                <i class="fas fa-copy"></i>
+                                <span>Sao chép</span>
+                            </button>
+                            <button onclick="addReaction(this, '❤️')" class="text-slate-400 hover:text-red-500 text-xs px-2 py-1 rounded-lg bg-slate-50 hover:bg-red-50 transition">
+                                ❤️️
+                            </button>
+                            <button onclick="addReaction(this, '🐬')" class="text-slate-400 hover:text-cyan-500 text-xs px-2 py-1 rounded-lg bg-slate-50 hover:bg-cyan-50 transition">
+                                🐬
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            chatBox.insertAdjacentHTML('beforeend', html);
+            scrollToBottom();
+        }
+
+        async function fetchGeminiResponse(userPrompt) {
+            const systemInstruction = `Bạn là Hưng Delight - một trợ lý AI thông minh, vui vẻ, ấm áp, mang đậm năng lượng tươi mát của biển cả ngọc bích và nắng vàng rực rỡ. 
+            Bạn luôn trả lời thân thiện, sử dụng tiếng Việt tự nhiên, giàu cảm xúc, có kèm emoji dễ thương (🐬, 🌊, ☀️, ✨, 🐚). Hãy giữ các câu trả lời gọn gàng, truyền cảm hứng và giúp người dùng thư giãn.`;
+
+            chatHistory.push({ role: "user", parts: [{ text: userPrompt }] });
+
+            const payload = {
+                contents: chatHistory,
+                systemInstruction: { parts: [{ text: systemInstruction }] }
+            };
+
+            const res = await fetch(GEMINI_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) throw new Error("API Error");
+
+            const data = await res.json();
+            const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Hưng Delight luôn lắng nghe bạn!";
+
+            // Keep context
+            chatHistory.push({ role: "model", parts: [{ text: aiText }] });
+
+            return aiText;
+        }
+
+        function setAIThinking(isThinking) {
+            const avatar = document.getElementById('aiAvatar');
+            const statusText = document.getElementById('aiStatusText');
+            if (isThinking) {
+                avatar.classList.add('avatar-thinking');
+                statusText.innerText = "Hưng Delight đang suy nghĩ phản hồi...";
+                statusText.className = "text-xs text-amber-700 font-semibold animate-pulse";
+            } else {
+                avatar.classList.remove('avatar-thinking');
+                statusText.innerText = "Sẵn sàng lắng nghe & chia sẻ cùng bạn ✨";
+                statusText.className = "text-xs text-teal-800 font-medium";
+            }
+        }
+
+        function scrollToBottom() {
+            const chatBox = document.getElementById('chatBox');
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Helper Utilities
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, match => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[match]));
+        }
+
+        function formatMarkdown(text) {
+            let html = escapeHtml(text);
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-teal-900">$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+            html = html.replace(/\n/g, '<br>');
+            return html;
+        }
+
+        // Voice TTS (SpeechSynthesis)
+        function speakText(text) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel(); // Stop current speech
+
+            const cleanText = text.replace(/[*#_🐬🌊☀️✨🐚]/g, ''); // Clean markdown & emojis for speech
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = 'vi-VN';
+            utterance.rate = 1.0;
+            utterance.pitch = 1.1;
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function speakMessage(btn) {
+            const msgContent = btn.closest('.glass-ai-msg').querySelector('.msg-body').innerText;
+            speakText(msgContent);
+            playSfx('bubble');
+        }
+
+        function copyMessage(btn) {
+            const msgContent = btn.closest('.glass-ai-msg').querySelector('.msg-body').innerText;
+            const tempInput = document.createElement('textarea');
+            tempInput.value = msgContent;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand('copy');
+            document.body.removeChild(tempInput);
+
+            btn.innerHTML = `<i class="fas fa-check text-emerald-600"></i> <span class="text-emerald-600">Đã chép</span>`;
+            playSfx('bubble');
+            setTimeout(() => {
+                btn.innerHTML = `<i class="fas fa-copy"></i> <span>Sao chép</span>`;
+            }, 2000);
+        }
+
+        function addReaction(btn, emoji) {
+            btn.innerHTML = `${emoji} <span class="text-xs font-bold text-amber-600">+1</span>`;
+            playSfx('bubble');
+        }
+
+        // Speech Recognition (Mic Input)
+        function startVoiceRecognition() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Trình duyệt của bạn chưa hỗ trợ nhận diện giọng nói!");
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'vi-VN';
+
+            const micBtn = document.getElementById('micBtn');
+            micBtn.classList.add('bg-amber-100', 'text-amber-600', 'animate-pulse');
+
+            playSfx('bubble');
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('userInput').value = transcript;
+                micBtn.classList.remove('bg-amber-100', 'text-amber-600', 'animate-pulse');
+            };
+
+            recognition.onerror = () => {
+                micBtn.classList.remove('bg-amber-100', 'text-amber-600', 'animate-pulse');
+            };
+
+            recognition.onend = () => {
+                micBtn.classList.remove('bg-amber-100', 'text-amber-600', 'animate-pulse');
+            };
+
+            recognition.start();
+        }
+
+        // Initialize Audio on First User Interaction
+        document.addEventListener('click', () => {
+            initAudioContext();
+        }, { once: true });
+    </script>
+</body>
+</html>
